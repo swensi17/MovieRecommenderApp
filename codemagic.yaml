@@ -7,12 +7,12 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Set up project structure
+      - name: List files and setup
         script: |
-          mkdir -p MovieApp
-          mv MovieApp.swift MovieApp/
-          mv Info.plist MovieApp/
-          mv Assets.xcassets MovieApp/
+          ls -la
+          pwd
+          echo "Current directory structure:"
+          find . -type f
           
       - name: Build ipa for development
         script: |
