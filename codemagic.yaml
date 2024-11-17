@@ -9,6 +9,10 @@ workflows:
       vars:
         BUNDLE_ID: "com.example.MovieApp"
     scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+          
       - name: Generate Xcode Project
         script: |
           cd $CM_BUILD_DIR
