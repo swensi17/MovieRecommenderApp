@@ -6,10 +6,11 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
-      groups:
-        - ios_credentials
       vars:
         BUNDLE_ID: "com.example.MovieApp"
+        CM_CERTIFICATE: ${CM_CERTIFICATE}
+        CM_CERTIFICATE_PASSWORD: ${CM_CERTIFICATE_PASSWORD}
+        CM_PROVISIONING_PROFILE: ${CM_PROVISIONING_PROFILE}
     scripts:
       - name: Set up keychain
         script: |
