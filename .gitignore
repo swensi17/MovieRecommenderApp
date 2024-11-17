@@ -3,13 +3,30 @@
 *.xcworkspace
 *.pbxproj
 *.xcuserstate
-build/
-DerivedData/
+*.generated.swift
+
+# Certificates and profiles
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest
+*.cert
+certificate_base64.txt
+profile_base64.txt
+
+# Build artifacts
 *.ipa
-*.app.dSYM.zip
 *.app
 *.dSYM
+*.dSYM.zip
+build/
+DerivedData/
+
+# Environment files
+*.env
+.env*
+
+# Pods and dependencies
+Pods/
 .swiftpm
 .build/
-Pods/
-*.generated.swift
