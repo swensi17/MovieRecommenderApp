@@ -8,6 +8,7 @@ workflows:
       cocoapods: default
       ios_signing:
         distribution_type: development
+        bundle_identifier: com.example.MovieApp
     scripts:
       - name: Build ipa for development
         script: |
