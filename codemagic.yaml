@@ -7,72 +7,33 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: List files and setup
+      - name: Debug Info
         script: |
-          ls -la
+          echo "Current directory:"
           pwd
-          echo "Current directory structure:"
+          echo "\nDirectory contents:"
+          ls -la
+          echo "\nProject structure:"
           find . -type f
-
-      - name: Build ipa for development
+          echo "\nXcode version:"
+          xcodebuild -version
+          echo "\nXcode project info:"
+          xcodebuild -list -project MovieApp.xcodeproj || echo "Failed to list project info"
+          
+      - name: Build for simulator
         script: |
-          # Create build directory
-          mkdir -p build
-
-          # Update project settings
-          /usr/libexec/PlistBuddy -c "Set :INFOPLIST_FILE MovieApp/Info.plist" MovieApp.xcodeproj/project.pbxproj
-
-          # Build for simulator first (this creates the scheme)
           xcodebuild clean build \
             -project MovieApp.xcodeproj \
             -scheme MovieApp \
+            -configuration Debug \
             -sdk iphonesimulator \
-            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             SWIFT_VERSION=5.0 \
             DEVELOPMENT_TEAM="" \
-            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp"
-
-          # Now build for device
-          xcodebuild clean archive \
-            -project MovieApp.xcodeproj \
-            -scheme MovieApp \
-            -sdk iphoneos \
-            -configuration Debug \
-            -archivePath build/MovieApp.xcarchive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            SWIFT_VERSION=5.0 \
-            DEVELOPMENT_TEAM="" \
-            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp"
-
-          # Create exportOptions.plist
-          cat > exportOptions.plist << EOL
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>development</string>
-              <key>compileBitcode</key>
-              <false/>
-              <key>signingStyle</key>
-              <string>manual</string>
-          </dict>
-          </plist>
-          EOL
-
-          # Export IPA
-          xcodebuild -exportArchive \
-            -archivePath build/MovieApp.xcarchive \
-            -exportPath build/MovieApp \
-            -exportOptionsPlist exportOptions.plist \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
+            -verbose
     artifacts:
-      - build/**/*.ipa
-      - build/MovieApp.xcarchive/dSYMs/*.dSYM
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
