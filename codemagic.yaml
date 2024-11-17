@@ -9,9 +9,7 @@ workflows:
       groups:
         - ios_signing
       vars:
-        XCODE_TEAM_ID: ${XCODE_TEAM_ID}
         BUNDLE_ID: "com.example.MovieApp"
-        PROVISIONING_PROFILE_NAME: "MovieApp Development Profile"
     scripts:
       - name: Install dependencies
         script: |
@@ -34,121 +32,48 @@ workflows:
           echo "\nXcode version:"
           xcodebuild -version
           
-      - name: Generate Xcode Project
-        script: |
-          # Navigate to project directory
-          cd $CM_BUILD_DIR
-          
-          # Generate Xcode project from configuration
-          xcodegen generate
-          
-          echo "Created Xcode project:"
-          ls -la
-          
-          echo "Available schemes:"
-          xcodebuild -project MovieApp.xcodeproj -scheme MovieApp -list || true
-          
       - name: Set up code signing
         script: |
           echo "Setting up code signing..."
           keychain initialize
           
           # Import certificates
-          echo $CM_CERTIFICATE | base64 --decode > certificate.p12
-          keychain add-certificates --certificate certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
+          echo $CM_CERTIFICATE | base64 --decode > /tmp/certificate.p12
+          keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
           
-          # Set up provisioning profiles
-          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/provisioning_profile.mobileprovision
+          # Create a directory for provisioning profiles if it doesn't exist
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp /tmp/provisioning_profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
           
-      - name: Build for simulator
+          # Import provisioning profile
+          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/profile.mobileprovision
+          cp /tmp/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          
+      - name: Generate Xcode Project
         script: |
-          # Navigate to project directory
           cd $CM_BUILD_DIR
+          xcodegen generate
           
-          # Create build directory
-          mkdir -p build
-          
-          # Show build settings
-          echo "Build settings:"
-          xcodebuild -project MovieApp.xcodeproj -scheme MovieApp -showBuildSettings || true
-          
-          # Build for simulator
-          xcodebuild clean build \
-            -project MovieApp.xcodeproj \
-            -scheme MovieApp \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=18.0' \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="-" \
-            PROVISIONING_PROFILE_SPECIFIER="-" \
-            SWIFT_VERSION=5.0 \
-            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
-            ASSETCATALOG_COMPILER_APPICON_NAME="" \
-            ENABLE_BITCODE=NO \
-            ONLY_ACTIVE_ARCH=YES \
-            -derivedDataPath build \
-            -verbose || {
-              echo "Build failed. Showing xcodebuild output:"
-              cat $(find build -name "*.log" | grep -i "xcodebuild") || true
-              exit 1
-            }
-            
       - name: Archive and export IPA
         script: |
-          # Navigate to project directory
           cd $CM_BUILD_DIR
           
-          # Archive for device
+          # Build archive
           xcodebuild clean archive \
             -project MovieApp.xcodeproj \
             -scheme MovieApp \
-            -configuration Debug \
-            -sdk iphoneos \
+            -configuration Release \
             -archivePath build/MovieApp.xcarchive \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="-" \
-            PROVISIONING_PROFILE_SPECIFIER="-" \
-            SWIFT_VERSION=5.0 \
-            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
-            ASSETCATALOG_COMPILER_APPICON_NAME="" \
-            ENABLE_BITCODE=NO \
-            -verbose || {
-              echo "Archive failed. Showing xcodebuild output:"
-              cat $(find build -name "*.log" | grep -i "xcodebuild") || true
-              exit 1
-            }
-            
-          # Export IPA with detailed logging
-          echo "Exporting IPA with the following options:"
-          cat exportOptions.plist
+            CODE_SIGN_IDENTITY="Apple Development" \
+            PROVISIONING_PROFILE="00008130-001C6C100151001C"
           
+          # Export archive to IPA
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
-            -exportPath build/MovieApp \
             -exportOptionsPlist exportOptions.plist \
-            -verbose \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="-" \
-            PROVISIONING_PROFILE_SPECIFIER="-" || {
-              echo "Export failed. Showing xcodebuild output:"
-              ls -la build/MovieApp.xcarchive/Products/Applications/MovieApp.app/
-              cat $(find build -name "*.log" | grep -i "xcodebuild") || true
-              exit 1
-            }
+            -exportPath build/
             
     artifacts:
+      - build/MovieApp.ipa
       - build/**/*.app
       - build/**/*.ipa
       - build/MovieApp.xcarchive/dSYMs/*.dSYM

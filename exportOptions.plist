@@ -4,20 +4,18 @@
 <dict>
     <key>method</key>
     <string>development</string>
-    <key>compileBitcode</key>
-    <false/>
+    <key>teamID</key>
+    <string>38X4H45H4M</string>
     <key>signingStyle</key>
     <string>manual</string>
-    <key>stripSwiftSymbols</key>
-    <false/>
-    <key>thinning</key>
-    <string>&lt;none&gt;</string>
-    <key>teamID</key>
-    <string>00008130</string>
     <key>provisioningProfiles</key>
     <dict>
         <key>com.example.MovieApp</key>
         <string>00008130-001C6C100151001C</string>
     </dict>
+    <key>compileBitcode</key>
+    <false/>
+    <key>stripSwiftSymbols</key>
+    <false/>
 </dict>
 </plist>
