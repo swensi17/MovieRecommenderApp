@@ -7,8 +7,9 @@ workflows:
       xcode: latest
       cocoapods: default
       vars:
-        XCODE_TEAM_ID: YOUR_TEAM_ID # Add your Apple Developer Team ID here
+        XCODE_TEAM_ID: ${XCODE_TEAM_ID}
         BUNDLE_ID: "com.example.MovieApp"
+        PROVISIONING_PROFILE_NAME: "MovieApp Development Profile"
     scripts:
       - name: Install dependencies
         script: |
