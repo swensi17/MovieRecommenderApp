@@ -13,6 +13,8 @@ workflows:
           pwd
           echo "\nDirectory contents:"
           ls -la
+          echo "\nMovieApp directory:"
+          ls -la MovieApp
           echo "\nProject structure:"
           find . -type f
           echo "\nXcode version:"
@@ -22,6 +24,10 @@ workflows:
           
       - name: Build for simulator
         script: |
+          # Create build directory
+          mkdir -p build
+          
+          # Build for simulator
           xcodebuild clean build \
             -project MovieApp.xcodeproj \
             -scheme MovieApp \
@@ -35,6 +41,40 @@ workflows:
             DEVELOPMENT_TEAM="" \
             PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
+            ENABLE_BITCODE=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            -derivedDataPath build \
             -verbose
+            
+      - name: Archive and export IPA
+        script: |
+          # Archive for device
+          xcodebuild clean archive \
+            -project MovieApp.xcodeproj \
+            -scheme MovieApp \
+            -configuration Debug \
+            -sdk iphoneos \
+            -archivePath build/MovieApp.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_VERSION=5.0 \
+            DEVELOPMENT_TEAM="" \
+            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
+            ASSETCATALOG_COMPILER_APPICON_NAME="" \
+            ENABLE_BITCODE=NO \
+            -verbose
+            
+          # Export IPA
+          xcodebuild -exportArchive \
+            -archivePath build/MovieApp.xcarchive \
+            -exportPath build/MovieApp \
+            -exportOptionsPlist exportOptions.plist \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+            
     artifacts:
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - build/**/*.app
+      - build/**/*.ipa
+      - build/MovieApp.xcarchive/dSYMs/*.dSYM

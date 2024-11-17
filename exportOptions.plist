@@ -8,7 +8,18 @@
     <string></string>
     <key>compileBitcode</key>
     <false/>
-    <key>uploadSymbols</key>
+    <key>uploadBitcode</key>
     <false/>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string></string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.example.MovieApp</key>
+        <string></string>
+    </dict>
 </dict>
 </plist>
