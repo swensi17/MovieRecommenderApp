@@ -1,27 +1,29 @@
 workflows:
-  ios-app:
-    name: iOS App
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m1
     environment:
       xcode: latest
       cocoapods: default
+      ios_signing:
+        distribution_type: development
     scripts:
-      - name: Build iOS app
+      - name: Build ipa for development
         script: |
           xcodebuild clean archive \
-            -scheme "MovieApp" \
+            -project MovieApp.xcodeproj \
+            -scheme MovieApp \
             -sdk iphoneos \
+            -configuration Debug \
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-      - name: Create IPA
-        script: |
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
-            -exportPath build/MovieApp.ipa \
-            -exportOptionsPlist exportOptions.plist \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            -exportPath build/MovieApp \
+            -exportOptionsPlist exportOptions.plist
     artifacts:
-      - build/MovieApp.ipa
+      - build/**/*.ipa
+      - build/MovieApp.xcarchive/dSYMs/*.dSYM
