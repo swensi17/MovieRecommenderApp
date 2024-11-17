@@ -6,6 +6,8 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
+      groups:
+        - ios_signing
       vars:
         XCODE_TEAM_ID: ${XCODE_TEAM_ID}
         BUNDLE_ID: "com.example.MovieApp"

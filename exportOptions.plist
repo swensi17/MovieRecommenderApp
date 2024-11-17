@@ -13,11 +13,11 @@
     <key>thinning</key>
     <string>&lt;none&gt;</string>
     <key>teamID</key>
-    <string>${XCODE_TEAM_ID}</string>
+    <string>00008130</string>
     <key>provisioningProfiles</key>
     <dict>
         <key>com.example.MovieApp</key>
-        <string>${PROVISIONING_PROFILE_NAME}</string>
+        <string>00008130-001C6C100151001C</string>
     </dict>
 </dict>
 </plist>
