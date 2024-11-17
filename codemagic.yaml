@@ -6,9 +6,25 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
+      groups:
+        - ios_credentials
       vars:
         BUNDLE_ID: "com.example.MovieApp"
     scripts:
+      - name: Set up keychain
+        script: |
+          echo "Setting up keychain..."
+          keychain initialize
+          
+          # Add certificate
+          echo $CM_CERTIFICATE | base64 --decode > /tmp/certificate.p12
+          keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
+          
+          # Add provisioning profile
+          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp /tmp/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          
       - name: Install XcodeGen
         script: |
           brew install xcodegen
@@ -30,7 +46,8 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="Apple Development" \
             DEVELOPMENT_TEAM="38X4H45H4M" \
-            CODE_SIGN_STYLE="Automatic"
+            PROVISIONING_PROFILE_SPECIFIER="profile" \
+            CODE_SIGN_STYLE="Manual"
           
           # Export archive to IPA
           xcodebuild -exportArchive \
