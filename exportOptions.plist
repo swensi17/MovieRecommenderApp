@@ -3,20 +3,27 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>enterprise</string>
-    <key>teamID</key>
-    <string>DUMMY_TEAM_ID</string>
+    <string>development</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
     <key>compileBitcode</key>
     <false/>
     <key>uploadBitcode</key>
     <false/>
     <key>uploadSymbols</key>
     <true/>
-    <key>signingStyle</key>
-    <string>automatic</string>
     <key>stripSwiftSymbols</key>
     <true/>
     <key>thinning</key>
     <string>&lt;none&gt;</string>
+    <key>developmentTeam</key>
+    <string>DUMMY_TEAM_ID</string>
+    <key>signingCertificate</key>
+    <string>Apple Development</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.example.MovieApp</key>
+        <string>MovieApp Development</string>
+    </dict>
 </dict>
 </plist>
