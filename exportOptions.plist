@@ -13,6 +13,8 @@
         <key>com.example.MovieApp</key>
         <string>00008130-001C6C100151001C</string>
     </dict>
+    <key>signingCertificate</key>
+    <string>Apple Development</string>
     <key>compileBitcode</key>
     <false/>
     <key>stripSwiftSymbols</key>
