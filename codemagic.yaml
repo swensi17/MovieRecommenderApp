@@ -1,0 +1,22 @@
+workflows:
+  ios-app:
+    name: iOS App
+    environment:
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Build iOS app
+        script: |
+          xcodebuild build -scheme "MovieApp" \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath build/MovieApp.xcarchive \
+            clean archive
+      - name: Create IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath build/MovieApp.xcarchive \
+            -exportPath build/MovieApp.ipa \
+            -exportOptionsPlist exportOptions.plist
+    artifacts:
+      - build/MovieApp.ipa
