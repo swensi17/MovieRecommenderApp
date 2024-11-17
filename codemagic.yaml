@@ -22,9 +22,9 @@ workflows:
           keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
           
           # Add provisioning profile
-          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/profile.mobileprovision
+          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/00008130-001C6C100151001C.mobileprovision
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp /tmp/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp /tmp/00008130-001C6C100151001C.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
           
       - name: Install XcodeGen
         script: |
@@ -47,7 +47,7 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="Apple Development" \
             DEVELOPMENT_TEAM="38X4H45H4M" \
-            PROVISIONING_PROFILE_SPECIFIER="profile" \
+            PROVISIONING_PROFILE_SPECIFIER="00008130-001C6C100151001C" \
             CODE_SIGN_STYLE="Manual"
           
           # Export archive to IPA
