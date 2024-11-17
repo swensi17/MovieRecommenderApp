@@ -1,0 +1,35 @@
+name: MovieApp
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: 14.0
+  xcodeVersion: "14.0"
+  
+targets:
+  MovieApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: MovieApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.MovieApp
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        SWIFT_VERSION: 5.0
+        TARGETED_DEVICE_FAMILY: 1,2
+    info:
+      path: MovieApp/Info.plist
+      properties:
+        CFBundleName: MovieApp
+        CFBundleDisplayName: MovieApp
+        UILaunchStoryboardName: LaunchScreen
+        UIMainStoryboardFile: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIRequiresFullScreen: false
+        ITSAppUsesNonExemptEncryption: false
