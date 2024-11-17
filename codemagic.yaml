@@ -37,9 +37,32 @@ workflows:
           echo "Setting up code signing..."
           keychain initialize
           
-          # Import certificates
-          echo $CM_CERTIFICATE | base64 --decode > certificate.p12
-          keychain add-certificates --certificate certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
+          # Debug: Check if certificate environment variable exists
+          if [ -z "$CM_CERTIFICATE" ]; then
+            echo "Error: CM_CERTIFICATE is empty"
+            exit 1
+          fi
+          
+          # Debug: Check certificate password
+          if [ -z "$CM_CERTIFICATE_PASSWORD" ]; then
+            echo "Error: CM_CERTIFICATE_PASSWORD is empty"
+            exit 1
+          fi
+          
+          # Create certificates directory
+          mkdir -p "$HOME/certificates"
+          
+          # Save and check certificate
+          echo "Decoding and saving certificate..."
+          echo "$CM_CERTIFICATE" | base64 --decode > "$HOME/certificates/certificate.p12"
+          
+          # Debug: Check if certificate file exists and its size
+          ls -la "$HOME/certificates/certificate.p12"
+          
+          echo "Adding certificate to keychain..."
+          keychain add-certificates \
+            --certificate "$HOME/certificates/certificate.p12" \
+            --certificate-password "$CM_CERTIFICATE_PASSWORD"
           
       - name: Generate Xcode Project
         script: |
