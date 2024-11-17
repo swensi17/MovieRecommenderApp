@@ -19,13 +19,19 @@ workflows:
           find . -type f
           echo "\nXcode version:"
           xcodebuild -version
-          echo "\nXcode project info:"
-          xcodebuild -list -project MovieApp.xcodeproj || echo "Failed to list project info"
+          
+      - name: Set up build directory
+        script: |
+          # Navigate to project directory
+          cd $CM_BUILD_DIR
+          
+          # Create build directory
+          mkdir -p build
           
       - name: Build for simulator
         script: |
-          # Create build directory
-          mkdir -p build
+          # Navigate to project directory
+          cd $CM_BUILD_DIR
           
           # Build for simulator
           xcodebuild clean build \
@@ -44,10 +50,13 @@ workflows:
             ENABLE_BITCODE=NO \
             ONLY_ACTIVE_ARCH=YES \
             -derivedDataPath build \
-            -verbose
+            -verbose || exit 1
             
       - name: Archive and export IPA
         script: |
+          # Navigate to project directory
+          cd $CM_BUILD_DIR
+          
           # Archive for device
           xcodebuild clean archive \
             -project MovieApp.xcodeproj \
@@ -63,7 +72,7 @@ workflows:
             PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
             ENABLE_BITCODE=NO \
-            -verbose
+            -verbose || exit 1
             
           # Export IPA
           xcodebuild -exportArchive \
@@ -72,7 +81,7 @@ workflows:
             -exportOptionsPlist exportOptions.plist \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO || exit 1
             
     artifacts:
       - build/**/*.app
