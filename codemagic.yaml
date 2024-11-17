@@ -38,15 +38,21 @@ workflows:
           keychain initialize
           
           # Import certificates
-          echo $CM_CERTIFICATE | base64 --decode > /tmp/certificate.p12
-          keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
+          echo $CM_CERTIFICATE | base64 --decode > certificate.p12
+          keychain add-certificates --certificate certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
           
-          # Create a directory for provisioning profiles if it doesn't exist
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          # Create a directory for provisioning profiles
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
           
-          # Import provisioning profile with UUID as filename
-          PROFILE_PATH="~/Library/MobileDevice/Provisioning Profiles/00008130-001C6C100151001C.mobileprovision"
+          # Save provisioning profile
+          PROFILE_PATH="$PROFILES_DIR/00008130-001C6C100151001C.mobileprovision"
           echo $CM_PROVISIONING_PROFILE | base64 --decode > "$PROFILE_PATH"
+          
+          # Debug output
+          echo "Checking certificate and profile:"
+          ls -la certificate.p12 || true
+          ls -la "$PROFILE_PATH" || true
           
       - name: Generate Xcode Project
         script: |
