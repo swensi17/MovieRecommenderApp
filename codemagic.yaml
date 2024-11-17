@@ -28,10 +28,33 @@ workflows:
           # Create build directory
           mkdir -p build
           
+      - name: Create Xcode scheme
+        script: |
+          # Navigate to project directory
+          cd $CM_BUILD_DIR
+          
+          # Create scheme
+          xcodebuild -project MovieApp.xcodeproj -list || {
+            echo "Creating new scheme..."
+            xcodebuild -project MovieApp.xcodeproj -scheme MovieApp -configuration Debug build \
+              CODE_SIGN_IDENTITY="" \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGNING_ALLOWED=NO \
+              -showBuildSettings > /dev/null 2>&1 || true
+          }
+          
+          # Show available schemes
+          echo "Available schemes:"
+          xcodebuild -project MovieApp.xcodeproj -list
+          
       - name: Build for simulator
         script: |
           # Navigate to project directory
           cd $CM_BUILD_DIR
+          
+          # Show build settings
+          echo "Build settings:"
+          xcodebuild -project MovieApp.xcodeproj -scheme MovieApp -showBuildSettings
           
           # Build for simulator
           xcodebuild clean build \
@@ -50,7 +73,11 @@ workflows:
             ENABLE_BITCODE=NO \
             ONLY_ACTIVE_ARCH=YES \
             -derivedDataPath build \
-            -verbose || exit 1
+            -verbose || {
+              echo "Build failed. Showing xcodebuild output:"
+              cat $(find build -name "*.log" | grep -i "xcodebuild")
+              exit 1
+            }
             
       - name: Archive and export IPA
         script: |
@@ -72,7 +99,11 @@ workflows:
             PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
             ENABLE_BITCODE=NO \
-            -verbose || exit 1
+            -verbose || {
+              echo "Archive failed. Showing xcodebuild output:"
+              cat $(find build -name "*.log" | grep -i "xcodebuild")
+              exit 1
+            }
             
           # Export IPA
           xcodebuild -exportArchive \
@@ -81,7 +112,11 @@ workflows:
             -exportOptionsPlist exportOptions.plist \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO || exit 1
+            CODE_SIGNING_ALLOWED=NO || {
+              echo "Export failed. Showing xcodebuild output:"
+              cat $(find build -name "*.log" | grep -i "xcodebuild")
+              exit 1
+            }
             
     artifacts:
       - build/**/*.app
