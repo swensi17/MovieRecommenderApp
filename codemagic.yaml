@@ -7,11 +7,29 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Set up code signing settings
+      - name: Set up project structure
         script: |
-          echo "No code signing required for development build"
+          mkdir -p MovieApp
+          mv MovieApp.swift MovieApp/
+          mv Info.plist MovieApp/
+          mv Assets.xcassets MovieApp/
+          
       - name: Build ipa for development
         script: |
+          # Create build directory
+          mkdir -p build
+          
+          # Build for simulator first (this creates the scheme)
+          xcodebuild clean build \
+            -project MovieApp.xcodeproj \
+            -scheme MovieApp \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+            
+          # Now build for device
           xcodebuild clean archive \
             -project MovieApp.xcodeproj \
             -scheme MovieApp \
@@ -20,12 +38,10 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER=""
+            CODE_SIGNING_ALLOWED=NO
           
           # Create exportOptions.plist
-          cat >> exportOptions.plist << EOL
+          cat > exportOptions.plist << EOL
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -40,6 +56,7 @@ workflows:
           </plist>
           EOL
           
+          # Export IPA
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportPath build/MovieApp \
