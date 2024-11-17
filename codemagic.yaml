@@ -51,6 +51,7 @@ workflows:
           
           # Create certificates directory
           mkdir -p "$HOME/certificates"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           
           # Save and check certificate
           echo "Decoding and saving certificate..."
@@ -58,6 +59,11 @@ workflows:
           
           # Debug: Check if certificate file exists and its size
           ls -la "$HOME/certificates/certificate.p12"
+          
+          # Save provisioning profile
+          echo "Decoding and saving provisioning profile..."
+          echo "$CM_PROVISIONING_PROFILE" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
           
           echo "Adding certificate to keychain..."
           keychain add-certificates \
@@ -81,13 +87,15 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="Apple Development" \
             DEVELOPMENT_TEAM="38X4H45H4M" \
-            CODE_SIGN_STYLE="Automatic"
+            PROVISIONING_PROFILE_SPECIFIER="profile" \
+            CODE_SIGN_STYLE="Manual"
           
           # Export archive to IPA
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportOptionsPlist exportOptions.plist \
-            -exportPath build/
+            -exportPath build/ \
+            -verbose
             
     artifacts:
       - build/MovieApp.ipa
