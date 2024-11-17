@@ -7,12 +7,7 @@
     <key>teamID</key>
     <string>38X4H45H4M</string>
     <key>signingStyle</key>
-    <string>manual</string>
-    <key>provisioningProfiles</key>
-    <dict>
-        <key>com.example.MovieApp</key>
-        <string>profile</string>
-    </dict>
+    <string>automatic</string>
     <key>compileBitcode</key>
     <false/>
     <key>stripSwiftSymbols</key>

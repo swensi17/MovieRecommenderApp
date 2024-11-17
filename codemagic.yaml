@@ -6,76 +6,15 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
-      groups:
-        - ios_signing
       vars:
         BUNDLE_ID: "com.example.MovieApp"
     scripts:
-      - name: Install dependencies
-        script: |
-          echo "Installing XcodeGen..."
-          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-          brew install xcodegen
-          
-      - name: Debug Info
-        script: |
-          echo "Current directory:"
-          pwd
-          echo "\nDirectory contents:"
-          ls -la
-          echo "\nMovieApp directory:"
-          ls -la MovieApp || true
-          echo "\nProject structure:"
-          find . -type f || true
-          echo "\nXcode version:"
-          xcodebuild -version
-          
-      - name: Set up code signing
-        script: |
-          echo "Setting up code signing..."
-          keychain initialize
-          
-          # Debug: Check if certificate environment variable exists
-          if [ -z "$CM_CERTIFICATE" ]; then
-            echo "Error: CM_CERTIFICATE is empty"
-            exit 1
-          fi
-          
-          # Debug: Check certificate password
-          if [ -z "$CM_CERTIFICATE_PASSWORD" ]; then
-            echo "Error: CM_CERTIFICATE_PASSWORD is empty"
-            exit 1
-          fi
-          
-          # Create certificates directory
-          mkdir -p "$HOME/certificates"
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          
-          # Save and check certificate
-          echo "Decoding and saving certificate..."
-          echo "$CM_CERTIFICATE" | base64 --decode > "$HOME/certificates/certificate.p12"
-          
-          # Debug: Check if certificate file exists and its size
-          ls -la "$HOME/certificates/certificate.p12"
-          
-          # Save provisioning profile
-          echo "Decoding and saving provisioning profile..."
-          echo "$CM_PROVISIONING_PROFILE" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
-          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
-          
-          echo "Adding certificate to keychain..."
-          keychain add-certificates \
-            --certificate "$HOME/certificates/certificate.p12" \
-            --certificate-password "$CM_CERTIFICATE_PASSWORD"
-          
       - name: Generate Xcode Project
         script: |
           cd $CM_BUILD_DIR
           xcodegen generate
           
-      - name: Archive and export IPA
+      - name: Build and Export IPA
         script: |
           cd $CM_BUILD_DIR
           
@@ -83,18 +22,18 @@ workflows:
           xcodebuild clean archive \
             -project MovieApp.xcodeproj \
             -scheme MovieApp \
-            -configuration Release \
+            -configuration Debug \
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="Apple Development" \
             DEVELOPMENT_TEAM="38X4H45H4M" \
-            PROVISIONING_PROFILE_SPECIFIER="profile" \
-            CODE_SIGN_STYLE="Manual"
+            CODE_SIGN_STYLE="Automatic"
           
           # Export archive to IPA
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportOptionsPlist exportOptions.plist \
             -exportPath build/ \
+            -allowProvisioningUpdates \
             -verbose
             
     artifacts:
