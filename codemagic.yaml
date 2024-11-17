@@ -6,10 +6,10 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: development
-        bundle_identifier: com.example.MovieApp
     scripts:
+      - name: Set up code signing settings
+        script: |
+          echo "No code signing required for development build"
       - name: Build ipa for development
         script: |
           xcodebuild clean archive \
@@ -20,11 +20,33 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+          
+          # Create exportOptions.plist
+          cat >> exportOptions.plist << EOL
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>compileBitcode</key>
+              <false/>
+              <key>signingStyle</key>
+              <string>manual</string>
+          </dict>
+          </plist>
+          EOL
+          
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportPath build/MovieApp \
-            -exportOptionsPlist exportOptions.plist
+            -exportOptionsPlist exportOptions.plist \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
     artifacts:
       - build/**/*.ipa
       - build/MovieApp.xcarchive/dSYMs/*.dSYM
