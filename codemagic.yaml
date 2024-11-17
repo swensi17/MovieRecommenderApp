@@ -7,16 +7,21 @@ workflows:
     scripts:
       - name: Build iOS app
         script: |
-          xcodebuild build -scheme "MovieApp" \
+          xcodebuild clean archive \
+            -scheme "MovieApp" \
             -sdk iphoneos \
-            -configuration Release \
             -archivePath build/MovieApp.xcarchive \
-            clean archive
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
       - name: Create IPA
         script: |
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportPath build/MovieApp.ipa \
-            -exportOptionsPlist exportOptions.plist
+            -exportOptionsPlist exportOptions.plist \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
     artifacts:
       - build/MovieApp.ipa
