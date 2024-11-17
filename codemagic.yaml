@@ -13,12 +13,15 @@ workflows:
           pwd
           echo "Current directory structure:"
           find . -type f
-          
+
       - name: Build ipa for development
         script: |
           # Create build directory
           mkdir -p build
-          
+
+          # Update project settings
+          /usr/libexec/PlistBuddy -c "Set :INFOPLIST_FILE MovieApp/Info.plist" MovieApp.xcodeproj/project.pbxproj
+
           # Build for simulator first (this creates the scheme)
           xcodebuild clean build \
             -project MovieApp.xcodeproj \
@@ -27,8 +30,11 @@ workflows:
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-            
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_VERSION=5.0 \
+            DEVELOPMENT_TEAM="" \
+            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp"
+
           # Now build for device
           xcodebuild clean archive \
             -project MovieApp.xcodeproj \
@@ -38,8 +44,11 @@ workflows:
             -archivePath build/MovieApp.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-          
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_VERSION=5.0 \
+            DEVELOPMENT_TEAM="" \
+            PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp"
+
           # Create exportOptions.plist
           cat > exportOptions.plist << EOL
           <?xml version="1.0" encoding="UTF-8"?>
@@ -55,7 +64,7 @@ workflows:
           </dict>
           </plist>
           EOL
-          
+
           # Export IPA
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
