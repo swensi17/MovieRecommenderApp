@@ -3,10 +3,21 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>ad-hoc</string>
+    <string>development</string>
     <key>compileBitcode</key>
     <false/>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
+    <key>stripSwiftSymbols</key>
+    <false/>
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.example.MovieApp</key>
+        <string>YOUR_PROVISIONING_PROFILE_NAME</string>
+    </dict>
 </dict>
 </plist>

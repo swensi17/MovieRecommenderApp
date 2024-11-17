@@ -6,6 +6,9 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
+      vars:
+        XCODE_TEAM_ID: YOUR_TEAM_ID # Add your Apple Developer Team ID here
+        BUNDLE_ID: "com.example.MovieApp"
     scripts:
       - name: Install dependencies
         script: |
@@ -42,6 +45,20 @@ workflows:
           echo "Available schemes:"
           xcodebuild -project MovieApp.xcodeproj -scheme MovieApp -list || true
           
+      - name: Set up code signing
+        script: |
+          echo "Setting up code signing..."
+          keychain initialize
+          
+          # Import certificates
+          echo $CM_CERTIFICATE | base64 --decode > certificate.p12
+          keychain add-certificates --certificate certificate.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
+          
+          # Set up provisioning profiles
+          echo $CM_PROVISIONING_PROFILE | base64 --decode > /tmp/provisioning_profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp /tmp/provisioning_profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          
       - name: Build for simulator
         script: |
           # Navigate to project directory
@@ -61,11 +78,13 @@ workflows:
             -configuration Debug \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=18.0' \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="-" \
+            PROVISIONING_PROFILE_SPECIFIER="-" \
             SWIFT_VERSION=5.0 \
-            DEVELOPMENT_TEAM="" \
             PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
             ENABLE_BITCODE=NO \
@@ -89,11 +108,13 @@ workflows:
             -configuration Debug \
             -sdk iphoneos \
             -archivePath build/MovieApp.xcarchive \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="-" \
+            PROVISIONING_PROFILE_SPECIFIER="-" \
             SWIFT_VERSION=5.0 \
-            DEVELOPMENT_TEAM="" \
             PRODUCT_BUNDLE_IDENTIFIER="com.example.MovieApp" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
             ENABLE_BITCODE=NO \
@@ -103,15 +124,23 @@ workflows:
               exit 1
             }
             
-          # Export IPA
+          # Export IPA with detailed logging
+          echo "Exporting IPA with the following options:"
+          cat exportOptions.plist
+          
           xcodebuild -exportArchive \
             -archivePath build/MovieApp.xcarchive \
             -exportPath build/MovieApp \
             -exportOptionsPlist exportOptions.plist \
-            CODE_SIGN_IDENTITY="" \
+            -verbose \
+            CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO || {
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="-" \
+            PROVISIONING_PROFILE_SPECIFIER="-" || {
               echo "Export failed. Showing xcodebuild output:"
+              ls -la build/MovieApp.xcarchive/Products/Applications/MovieApp.app/
               cat $(find build -name "*.log" | grep -i "xcodebuild") || true
               exit 1
             }
